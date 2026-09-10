@@ -2,7 +2,7 @@
 
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?logo=openapiinitiative&logoColor=white)](https://www.openapis.org/)
 [![Redocly](https://img.shields.io/badge/Redocly-API%20Documentation-EF496F)](https://redocly.com/)
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](#)
+[![Status](https://img.shields.io/badge/status-em%20produção-6BA539)](#)
 
 Documentação da API responsável pela integração de operações de crédito entre o **ERP TOTVS Protheus** e o **e-commerce VTEX**.
 
