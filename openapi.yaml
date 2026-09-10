@@ -11,6 +11,7 @@ info:
     url: '/rest-vtex/assets/rest-vtex-logo.png'
     # backgroundColor: '#FFFFFF'
     altText: 'REST VTEX logo'
+    href: 'https://crysataide.github.io/rest-vtex/'
 servers:
   - url: https://wkrtswcddl.execute-api.us-east-2.amazonaws.com/vtex/rest
     description: Produção

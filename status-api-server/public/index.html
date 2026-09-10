@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status da API VTEX</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0e14;
+    --bg-scan: rgba(212, 167, 44, 0.02);
+    --panel: #10161f;
+    --panel-border: #212b36;
+    --panel-border-hover: #2c3947;
+    --text-primary: #e6edf3;
+    --text-muted: #7d8b99;
+    --text-dim: #4b5a68;
+    --amber: #d4a72c;
+    --success: #3fb950;
+    --error: #f0605a;
+    --error-dim: rgba(240, 96, 90, 0.12);
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      repeating-linear-gradient(0deg, var(--bg-scan) 0px, transparent 1px, transparent 2px),
+      radial-gradient(ellipse at top, #0d131b 0%, var(--bg) 55%);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    padding: 32px 20px 60px;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 20px;
+    margin-bottom: 28px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.6rem;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    max-width: 46ch;
+    line-height: 1.5;
+  }
+
+  .clock {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-align: right;
+  }
+  .clock strong { color: var(--amber); font-weight: 500; }
+
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 720px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .panel:hover { border-color: var(--panel-border-hover); }
+
+  .panel-head {
+    padding: 18px 20px 16px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+
+  .env-name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 3px;
+  }
+
+  .endpoint {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    word-break: break-all;
+    margin: 0 0 14px;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  .dot.ok { background: var(--success); box-shadow: 0 0 10px 1px var(--success); }
+  .dot.fail { background: var(--error); box-shadow: 0 0 10px 1px var(--error); }
+  .dot.checking { background: var(--amber); animation: pulse 1s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  .status-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .status-text.ok { color: var(--success); }
+  .status-text.fail { color: var(--error); }
+  .status-text.checking { color: var(--amber); }
+
+  .code-badge {
+    margin-left: auto;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: #0000;
+    border: 1px solid var(--panel-border);
+    color: var(--text-muted);
+  }
+
+  .panel-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--panel-border);
+    background: #0d1219;
+  }
+
+  button {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: transparent;
+    border: 1px solid var(--panel-border);
+    color: var(--text-muted);
+    padding: 6px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  button:hover { border-color: var(--amber); color: var(--amber); }
+  button:focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+  button.active { border-color: var(--amber); color: var(--amber); }
+
+  .log {
+    height: 200px;
+    overflow-y: auto;
+    padding: 12px 20px 16px;
+    font-size: 0.74rem;
+    line-height: 1.9;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .log::-webkit-scrollbar { width: 6px; }
+  .log::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 3px; }
+
+  .log-entry { white-space: pre-wrap; word-break: break-word; }
+  .log-entry .time { color: var(--text-dim); }
+  .log-entry.ok .label { color: var(--success); }
+  .log-entry.fail .label { color: var(--error); }
+  .log-entry .detail { color: var(--text-muted); }
+
+  .empty-log { color: var(--text-dim); font-style: normal; }
+
+  .note {
+    margin-top: 28px;
+    border: 1px solid var(--panel-border);
+    border-radius: 3px;
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .note strong { color: var(--text-primary); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Status da API VTEX</h1>
+        <p>Monitoramento contínuo dos ambientes de produção e homologação, consultados a cada 3 segundos via servidor local.</p>
+      </div>
+      <div class="clock">última varredura<br><strong id="lastSweep">—</strong></div>
+    </header>
+
+    <div class="panels" id="panels"></div>
+
+    <div class="note">
+      <strong>Como funciona:</strong> esta página não guarda nenhuma credencial — ela consulta <code>/api/status/prod</code> e <code>/api/status/hom</code> neste mesmo servidor, que é quem de fato chama a AWS com as chaves guardadas no <code>.env</code>. Para isso funcionar, o servidor Node (<code>server.js</code>) precisa estar rodando.
+    </div>
+  </div>
+
+<script>
+const ENVIRONMENTS = [
+  { id: 'prod', name: 'Produção', endpoint: 'https://wkrtswcddl.execute-api.us-east-2.amazonaws.com/vtex/rest/' },
+  { id: 'hom', name: 'Homologação', endpoint: 'https://htztymyfp1.execute-api.us-east-2.amazonaws.com/hom/rest/' }
+];
+
+const INTERVAL_SECONDS = 3;
+const MAX_LOG_ENTRIES = 40;
+const state = {};
+
+function fmtTime(d) {
+  return d.toLocaleTimeString('pt-BR', { hour12: false });
+}
+
+function buildPanel(env) {
+  const el = document.createElement('div');
+  el.className = 'panel';
+  el.innerHTML = `
+    <div class="panel-head">
+      <p class="env-name">${env.name}</p>
+      <p class="endpoint">${env.endpoint}</p>
+      <div class="status-row">
+        <span class="dot checking" id="dot-${env.id}"></span>
+        <span class="status-text checking" id="text-${env.id}">verificando</span>
+        <span class="code-badge" id="code-${env.id}">—</span>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button id="pause-${env.id}">pausar</button>
+      <button id="now-${env.id}">consultar agora</button>
+    </div>
+    <div class="log" id="log-${env.id}">
+      <div class="log-entry empty-log">aguardando primeira consulta…</div>
+    </div>
+  `;
+  return el;
+}
+
+function renderLog(env) {
+  const logEl = document.getElementById(`log-${env.id}`);
+  const entries = state[env.id].entries;
+  logEl.innerHTML = entries.map(e => `
+    <div class="log-entry ${e.ok ? 'ok' : 'fail'}">
+      <span class="time">[${e.time}]</span>
+      <span class="label">${e.ok ? 'SUCESSO' : 'ERRO'}</span>
+      <span class="detail"> — ${e.detail}</span>
+    </div>
+  `).join('');
+}
+
+async function checkEnv(env) {
+  const dot = document.getElementById(`dot-${env.id}`);
+  const text = document.getElementById(`text-${env.id}`);
+  const code = document.getElementById(`code-${env.id}`);
+
+  dot.className = 'dot checking';
+  text.className = 'status-text checking';
+  text.textContent = 'verificando';
+
+  let ok = false;
+  let detail = '';
+  let httpCode = '—';
+
+  try {
+    const res = await fetch(`/api/status/${env.id}`);
+    const data = await res.json();
+    httpCode = String(data.httpCode);
+    ok = data.ok;
+    detail = data.error
+      ? `${data.error} (HTTP ${httpCode})`
+      : ok
+        ? `API online (HTTP ${httpCode})`
+        : `API respondeu com falha (HTTP ${httpCode})`;
+  } catch (err) {
+    ok = false;
+    httpCode = '000';
+    detail = 'servidor local indisponível (verifique se o server.js está rodando)';
+  }
+
+  dot.className = `dot ${ok ? 'ok' : 'fail'}`;
+  text.className = `status-text ${ok ? 'ok' : 'fail'}`;
+  text.textContent = ok ? 'online' : 'offline';
+  code.textContent = `HTTP ${httpCode}`;
+
+  const entry = { time: fmtTime(new Date()), ok, detail };
+  state[env.id].entries.unshift(entry);
+  if (state[env.id].entries.length > MAX_LOG_ENTRIES) state[env.id].entries.pop();
+  renderLog(env);
+
+  document.getElementById('lastSweep').textContent = fmtTime(new Date());
+}
+
+function scheduleNext(env) {
+  if (state[env.id].paused) return;
+  state[env.id].timer = setTimeout(async () => {
+    await checkEnv(env);
+    scheduleNext(env);
+  }, INTERVAL_SECONDS * 1000);
+}
+
+function init() {
+  const container = document.getElementById('panels');
+  ENVIRONMENTS.forEach(env => {
+    state[env.id] = { entries: [], paused: false, timer: null };
+    container.appendChild(buildPanel(env));
+  });
+
+  ENVIRONMENTS.forEach(env => {
+    document.getElementById(`now-${env.id}`).addEventListener('click', () => checkEnv(env));
+    document.getElementById(`pause-${env.id}`).addEventListener('click', (e) => {
+      state[env.id].paused = !state[env.id].paused;
+      e.target.textContent = state[env.id].paused ? 'retomar' : 'pausar';
+      e.target.classList.toggle('active', state[env.id].paused);
+      if (!state[env.id].paused) scheduleNext(env);
+      else clearTimeout(state[env.id].timer);
+    });
+  });
+
+  ENVIRONMENTS.forEach(async env => {
+    await checkEnv(env);
+    scheduleNext(env);
+  });
+}
+
+init();
+</script>
+</body>
+</html>
